@@ -45,7 +45,7 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
-          key: ${{ secrets.EC2_KEY }}
+          key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             sudo docker stop ms-administracion-archivos || true
             sudo docker rm ms-administracion-archivos || true
