@@ -2,7 +2,8 @@ name: Build and Deploy Semana 5
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
   build-deploy:
@@ -35,10 +36,12 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/ms-administracion-archivos:latest .
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/ms-administracion-archivos:latest .
 
       - name: Push Docker image
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/ms-administracion-archivos:latest
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/ms-administracion-archivos:latest
 
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v1.0.3
@@ -49,7 +52,9 @@ jobs:
           script: |
             sudo docker stop ms-administracion-archivos || true
             sudo docker rm ms-administracion-archivos || true
+
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/ms-administracion-archivos:latest
+
             sudo docker run -d \
               --name ms-administracion-archivos \
               -p 8080:8080 \
