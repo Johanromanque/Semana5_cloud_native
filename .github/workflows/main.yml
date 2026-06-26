@@ -13,22 +13,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create application.yml
-        run: |
-          mkdir -p src/main/resources
-          cat <<EOF > src/main/resources/application.yml
-          cloud:
-            aws:
-              credentials:
-                access-key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-                secret-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-              region:
-                static: us-east-1
-              stack:
-                auto: false
-          EOF
-
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
@@ -52,15 +36,14 @@ jobs:
           script: |
             sudo docker stop ms-administracion-archivos || true
             sudo docker rm ms-administracion-archivos || true
-            sudo docker pull johanromanque/ms-administracion-archivos:latest
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/ms-administracion-archivos:latest
 
-            sudo docker run -d \
-              --name ms-administracion-archivos \
-              -p 8080:8080 \
-              -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
-              -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
-              -e AWS_SESSION_TOKEN=${{ secrets.AWS_SESSION_TOKEN }} \
-              -e AWS_REGION=us-east-1 \
-              -e AWS_S3_BUCKET=bucketduocs2 \
-              johanromanque/ms-administracion-archivos:latest
-              
+            sudo docker run -d --name ms-administracion-archivos -p 8080:8080 \
+              -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
+              -e AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+              -e AWS_SESSION_TOKEN="${{ secrets.AWS_SESSION_TOKEN }}" \
+              -e AWS_REGION="us-east-1" \
+              -e AWS_S3_BUCKET="bucketduocs2" \
+              ${{ secrets.DOCKERHUB_USERNAME }}/ms-administracion-archivos:latest
+
+            sudo docker ps
